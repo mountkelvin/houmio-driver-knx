@@ -7,4 +7,4 @@ target/houmio-driver-knx-0.0.1.jar
 target/maven-archiver
 target/maven-status
 *.env
-houmio-site-knx.iml
+houmio-driver-knx.iml
