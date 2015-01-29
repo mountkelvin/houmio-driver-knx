@@ -26,6 +26,10 @@ Maven requires $JAVA_HOME to be set correctly  e.g.
 
 # Building the uberjar
 
-  mvn clean install
+    mvn clean install
 
 The jar is in `target` dir.
+
+# Run
+
+    java -jar target/houmio-driver-knx-0.0.1-jar-with-dependencies.jar
