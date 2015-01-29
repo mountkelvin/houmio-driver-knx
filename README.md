@@ -32,4 +32,6 @@ The jar is in `target` dir.
 
 # Run
 
+Set env variables `HOUMIO_KNX_IP` and `HOUMIO_NETWORK_INTERFACE` in case of the host having multiple network interfaces.
+
     java -jar target/houmio-driver-knx-0.0.1-jar-with-dependencies.jar
