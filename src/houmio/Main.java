@@ -7,10 +7,13 @@ import io.reactivex.netty.client.RxClient;
 import io.reactivex.netty.pipeline.PipelineConfigurators;
 import rx.Observable;
 import rx.functions.Action1;
+import tuwien.auto.calimero.CloseEvent;
+import tuwien.auto.calimero.FrameEvent;
 import tuwien.auto.calimero.GroupAddress;
 import tuwien.auto.calimero.exception.KNXException;
 import tuwien.auto.calimero.knxnetip.KNXnetIPConnection;
 import tuwien.auto.calimero.link.KNXNetworkLinkIP;
+import tuwien.auto.calimero.link.NetworkLinkListener;
 import tuwien.auto.calimero.link.medium.TPSettings;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 import tuwien.auto.calimero.process.ProcessCommunicatorImpl;
@@ -84,6 +87,8 @@ public class Main {
             false,
             new TPSettings(false)
         );
+        System.out.println(String.format("Connected to KNX IP gateway, from %s to %s", localInetAddress.getHostAddress(), knxIp));
+        knxLink.addLinkListener(new LinkClosedListener());
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -108,6 +113,24 @@ public class Main {
             System.err.println("Specify network interface via environment variable HOUMIO_NETWORK_INTERFACE");
             System.exit(0);
             return null;
+        }
+    }
+
+    private static class LinkClosedListener implements NetworkLinkListener {
+        @Override
+        public void confirmation(FrameEvent e) {
+
+        }
+
+        @Override
+        public void indication(FrameEvent e) {
+
+        }
+
+        @Override
+        public void linkClosed(CloseEvent e) {
+            System.out.println("Connection closed to KNX IP gateway, reason: " + e.getReason());
+            System.exit(0);
         }
     }
 }
