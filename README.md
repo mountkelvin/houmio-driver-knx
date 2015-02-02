@@ -23,23 +23,22 @@ Maven requires $JAVA_HOME to be set correctly  e.g.
     cat .bash_profile
     export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home
 
+# Running the driver with Houm.io
 
-# Building the uberjar
+    cd ~
+    git clone https://github.com/houmio/houmio-driver-knx
 
-    mvn clean install
+Add `HOUMIO_KNX_IP="aaa.bbb.ccc.ddd"` to `~/houmio.conf` `environment`.
 
-The jar is in `target` dir.
+Add `HOUMIO_NETWORK_INTERFACE=putyourinterfacehere` to `~/houmio.conf` `environment`, if the host has multiple network interfaces.
 
-# Run
+# Building and running from the command line
 
-* Set env variable `HOUMIO_KNX_IP` to point to your KNX IP gateway.
-* Set env variable `HOUMIO_NETWORK_INTERFACE` if the host has multiple network interfaces.
+Set env variable `HOUMIO_KNX_IP` to point to your KNX IP gateway.
+
+Set env variable `HOUMIO_NETWORK_INTERFACE` if the host has multiple network interfaces.
 
 Then:
 
+    mvn clean install
     java -jar target/houmio-driver-knx-0.0.1-jar-with-dependencies.jar
-
-## Running with Houm.io Bridge supervisor
-
-Add `HOUMIO_KNX_IP="aaa.bbb.ccc.ddd"` to `houmio.conf` `environment`.
-Add `HOUMIO_NETWORK_INTERFACE=putyourinterfacehere` to `houmio.conf` `environment`, if the host has multiple network interfaces.
