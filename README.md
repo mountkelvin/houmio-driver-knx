@@ -32,6 +32,8 @@ Add `HOUMIO_KNX_IP="aaa.bbb.ccc.ddd"` to `~/houmio.conf` `environment`.
 
 Add `HOUMIO_NETWORK_INTERFACE=putyourinterfacehere` to `~/houmio.conf` `environment`, if the host has multiple network interfaces.
 
+    sudo service supervisor restart
+
 # Building and running from the command line
 
 Set env variable `HOUMIO_KNX_IP` to point to your KNX IP gateway.
