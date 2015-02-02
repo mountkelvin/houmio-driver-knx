@@ -32,6 +32,14 @@ The jar is in `target` dir.
 
 # Run
 
-Set env variables `HOUMIO_KNX_IP` and `HOUMIO_NETWORK_INTERFACE` in case of the host having multiple network interfaces.
+* Set env variable `HOUMIO_KNX_IP` to point to your KNX IP gateway.
+* Set env variable `HOUMIO_NETWORK_INTERFACE` if the host has multiple network interfaces.
+
+Then:
 
     java -jar target/houmio-driver-knx-0.0.1-jar-with-dependencies.jar
+
+## Running with Houm.io Bridge supervisor
+
+Add `HOUMIO_KNX_IP="aaa.bbb.ccc.ddd"` to `houmio.conf` `environment`.
+Add `HOUMIO_NETWORK_INTERFACE=putyourinterfacehere` to `houmio.conf` `environment`, if the host has multiple network interfaces.
