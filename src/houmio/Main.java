@@ -36,6 +36,23 @@ public class Main {
         networkInterface.ifPresent(i -> System.out.println("Using HOUMIO_NETWORK_INTERFACE=" + i));
         knxSocket = createKnxSocket();
         openTcpSocketToBridgeWithProtocolKnx();
+        openTcpSocketToBridgeWithProtocolKnxDali();
+    }
+
+    private static void openTcpSocketToBridgeWithProtocolKnxDali() {
+        RxClient<String, String> rxClient = RxNetty.createTcpClient("localhost", 3001, PipelineConfigurators.stringMessageConfigurator());
+        Observable<ObservableConnection<String, String>> connectionObservable = rxClient.connect();
+        connectionObservable
+            .flatMap(c -> {
+                Observable<JsonNode> write = c.writeAndFlush(DriverProtocol.driverReadyMessage("knx/dali")).map(x -> Json.mapper.createObjectNode());
+                Observable<JsonNode> jsons = c.getInput().flatMap(Json.parseJson);
+                return Observable.concat(write, jsons);
+            })
+            .filter(json -> json.get("command").asText().equals("write"))
+            .map(o -> o.get("data"))
+            .map(KnxCommandData::fromJson)
+            .toBlocking()
+            .forEach(System.out::println);
     }
 
     private static void openTcpSocketToBridgeWithProtocolKnx() {
