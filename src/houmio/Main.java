@@ -35,15 +35,15 @@ public class Main {
         System.out.println("Using HOUMIO_KNX_IP=" + knxIp);
         networkInterface.ifPresent(i -> System.out.println("Using HOUMIO_NETWORK_INTERFACE=" + i));
         knxSocket = createKnxSocket();
-        openTcpSocketToBridgeWithProtocol("knx");
+        openTcpSocketToBridgeWithProtocolKnx();
     }
 
-    private static void openTcpSocketToBridgeWithProtocol(String protocol) {
+    private static void openTcpSocketToBridgeWithProtocolKnx() {
         RxClient<String, String> rxClient = RxNetty.createTcpClient("localhost", 3001, PipelineConfigurators.stringMessageConfigurator());
         Observable<ObservableConnection<String, String>> connectionObservable = rxClient.connect();
         connectionObservable
             .flatMap(c -> {
-                Observable<JsonNode> write = c.writeAndFlush(DriverProtocol.driverReadyMessage(protocol)).map(x -> Json.mapper.createObjectNode());
+                Observable<JsonNode> write = c.writeAndFlush(DriverProtocol.driverReadyMessage("knx")).map(x -> Json.mapper.createObjectNode());
                 Observable<JsonNode> jsons = c.getInput().flatMap(Json.parseJson);
                 return Observable.concat(write, jsons);
             })
