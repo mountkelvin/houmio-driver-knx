@@ -168,7 +168,6 @@ public class Main {
             System.out.println("Connection closed to KNX IP gateway, reason: " + e.getReason());
             System.exit(0);
         }
-
     }
 
     private static class KnxDaliCommandSubscriber extends Subscriber<KnxCommandData> {
