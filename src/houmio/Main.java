@@ -144,7 +144,7 @@ public class Main {
 
         @Override
         public void onError(Throwable throwable) {
-            System.out.println("Error from KNX command stream: " + throwable.getMessage());
+            System.out.println("Error from KNX command stream: " + throwable.getMessage());
         }
 
         @Override
