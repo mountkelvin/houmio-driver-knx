@@ -7,18 +7,14 @@ public class KnxCommandData {
     public final boolean on;
     public final int scaledBri;
     public final String switchAddress;
-    public final String switchConfirmationAddress;
     public final String absoluteAddress;
-    public final String absoluteConfirmationAddress;
 
-    public KnxCommandData(String type, boolean on, int scaledBri, String switchAddress, String switchConfirmationAddress, String absoluteAddress, String absoluteConfirmationAddress) {
+    public KnxCommandData(String type, boolean on, int scaledBri, String switchAddress, String absoluteAddress) {
         this.type = type;
         this.on = on;
         this.scaledBri = scaledBri;
         this.switchAddress = switchAddress;
-        this.switchConfirmationAddress = switchConfirmationAddress;
         this.absoluteAddress = absoluteAddress;
-        this.absoluteConfirmationAddress = absoluteConfirmationAddress;
     }
 
     public static KnxCommandData fromJson(JsonNode n) {
@@ -29,13 +25,10 @@ public class KnxCommandData {
         String protocolAddress = n.get("protocolAddress").asText();
         String[] groupAddresses = protocolAddress.split("\\.");
         String switchAddress = groupAddresses[0];
-        String switchConfirmationAddress = groupAddresses[1];
         String absoluteAddress = "";
-        String absoluteConfirmationAddress = "";
-        if("dimmable".equals(type)) {
+        if ("dimmable".equals(type)) {
             absoluteAddress = groupAddresses[2];
-            absoluteConfirmationAddress = groupAddresses[3];
         }
-        return new KnxCommandData(type, on, knxScaledBri, switchAddress, switchConfirmationAddress, absoluteAddress, absoluteConfirmationAddress);
+        return new KnxCommandData(type, on, knxScaledBri, switchAddress, absoluteAddress);
     }
 }
