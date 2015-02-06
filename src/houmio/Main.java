@@ -1,11 +1,5 @@
 package houmio;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.observables.StringObservable;
 import tuwien.auto.calimero.CloseEvent;
 import tuwien.auto.calimero.FrameEvent;
 import tuwien.auto.calimero.GroupAddress;
@@ -18,11 +12,14 @@ import tuwien.auto.calimero.link.medium.TPSettings;
 import tuwien.auto.calimero.process.ProcessCommunicator;
 import tuwien.auto.calimero.process.ProcessCommunicatorImpl;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class Main {
     static String HOUMIO_KNX_IP = Optional.ofNullable(System.getenv("HOUMIO_KNX_IP")).orElse("localhost");
@@ -36,7 +33,7 @@ public class Main {
             System.out.println("Using HOUMIO_KNX_IP=" + HOUMIO_KNX_IP);
             HOUMIO_NETWORK_INTERFACE.ifPresent(i -> System.out.println("Using HOUMIO_NETWORK_INTERFACE=" + i));
             knxSocket = createKnxSocket();
-            createBridgeSocketCommandObservable("knx").subscribe(new KnxCommandDataSubscriber());
+            createBridgeSocketCommandObservable("knx").forEach(Main::writeToKnxBus);
         } catch (KNXTimeoutException e) {
             System.out.println("Error while connecting to KNX ip gateway: " + e.getMessage());
         } catch (ConnectException e) {
@@ -48,7 +45,7 @@ public class Main {
             @Override
             public void run() {
                 System.out.println("Shut down hook execution started");
-                if(knxLink != null) {
+                if (knxLink != null) {
                     System.out.println("Going to close KNX link");
                     knxLink.close();
                     System.out.println("KNX link closed");
@@ -58,14 +55,16 @@ public class Main {
         });
     }
 
-    private static Observable<KnxCommandData> createBridgeSocketCommandObservable(String protocol) throws IOException {
+    private static Stream<KnxCommandData> createBridgeSocketCommandObservable(String protocol) throws IOException {
         bridgeSocket = new Socket("localhost", 3001);
         System.out.println("Connected to bridge at localhost:3001");
         PrintWriter bridgeSocketWriter = new PrintWriter(bridgeSocket.getOutputStream());
         bridgeSocketWriter.write(DriverProtocol.driverReadyMessage(protocol));
         bridgeSocketWriter.flush();
-        return StringObservable.from(new BufferedReader(new InputStreamReader(bridgeSocket.getInputStream())))
-            .flatMap(Json.parseJson)
+        BufferedReader bridgeSocketReader = new BufferedReader(new InputStreamReader(bridgeSocket.getInputStream()));
+        return bridgeSocketReader.lines()
+            .map(String::trim)
+            .flatMap(Json::parseJson)
             .filter(json -> json.get("command").asText().equals("write"))
             .map(o -> o.get("data"))
             .map(KnxCommandData::fromJson);
@@ -87,7 +86,7 @@ public class Main {
         return new ProcessCommunicatorImpl(knxLink);
     }
 
-    static Action1<KnxCommandData> writeToKnxBus = data -> {
+    static void writeToKnxBus(KnxCommandData data) {
         try {
             if (!data.on) {
                 writeSwitch(knxSocket, data.switchAddress, false);
@@ -101,7 +100,7 @@ public class Main {
         } catch (KNXException e) {
             throw new RuntimeException(e);
         }
-    };
+    }
 
     private static void writeAbsolute(ProcessCommunicator knxSocket, String absoluteAddress, int bri) throws KNXException {
         knxSocket.write(new GroupAddress(absoluteAddress), bri, ProcessCommunicator.SCALING);
@@ -134,24 +133,6 @@ public class Main {
                 System.exit(1);
             }
         }
-    }
-
-    private static class KnxCommandDataSubscriber extends Subscriber<KnxCommandData> {
-        @Override
-        public void onCompleted() {
-            System.out.println("KNX command stream completed");
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            System.out.println("Error from KNX command stream: " + throwable.getMessage());
-        }
-
-        @Override
-        public void onNext(KnxCommandData knxCommandData) {
-            writeToKnxBus.call(knxCommandData);
-        }
-
     }
 
     private static InetAddress resolveLocalInetAddress() throws SocketException {

@@ -18,6 +18,7 @@ public class KnxCommandData {
     }
 
     public static KnxCommandData fromJson(JsonNode n) {
+
         String type = n.get("type").asText();
         boolean on = n.get("on").asBoolean();
         int bri = n.get("bri").asInt();
